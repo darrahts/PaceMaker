@@ -12,7 +12,8 @@ enum State
     R, //
     Rp, // peak
     S, //
-    T  //
+    T,  //
+    E  // error
 };
 
 
@@ -66,19 +67,15 @@ int t = 0;
 //******************************************************* PACE
 void Pace()
 {
-    if(millis() - lastPace > 800)
+    if(millis() - lastPace > 880)
     {
         digitalWrite(PACE_SIGNAL_PIN, HIGH);
         //Serial.print("PACED at: ");
         //Serial.println(reading);
-        errorTime = millis();
         while(reading > 160 || reading < 120)
         {
             Poll();
         }
-        //Serial.println(millis() - errorTime);
-        //Serial.println();
-
         digitalWrite(PACE_SIGNAL_PIN, LOW);
         lastPace = millis();
     }
@@ -96,15 +93,15 @@ void Poll()
 
 void UpdateStateVariables(int &arrayCounter,int &stateCounter, int timesArray[])
 {
-    //Serial.print("state: ");
-    //Serial.print(int(state));
-    //Serial.print("     count: ");
-    //Serial.println(stateCounter);
+//    Serial.print("state: ");
+//    Serial.print(int(state));
+//    Serial.print("     count: ");
+//    Serial.println(stateCounter);
     timesArray[arrayCounter] = stateCounter;
     stateCounter = 0;
     arrayCounter++;
-    //Serial.print("arrayCounter: ");
-    //Serial.println(arrayCounter);
+//    Serial.print("arrayCounter: ");
+//    Serial.println(arrayCounter);
     if(arrayCounter == 10)
     {
 //        Serial.print("state: ");
@@ -120,39 +117,46 @@ void UpdateStateVariables(int &arrayCounter,int &stateCounter, int timesArray[])
     }
 }
 
+void PrintHeader()
+{
+    if(state == P)
+    {
+        Serial.println("******");
+    }
+    Serial.print("state: ");
+    Serial.print(int(state));
+}
+
+void PrintBody()
+{
+    Serial.print("     duration: ");
+    Serial.print(duration);
+    if(state == Rp || state == S)
+    {
+        Serial.print(" ");
+    }
+    Serial.print("     next state: ");
+    Serial.print(int(state));    
+    Serial.println();
+}
 
 //******************************************************* SetState
 void SetState(int nextState)
 {
-//    if(state == P)
-//    {
-//        Serial.println("******");
-//    }
-//    Serial.print("state: ");
-//    Serial.print(int(state));
-    
+//    PrintHeader();
     state = State(nextState);
-    
     if(!timerReady)
     {
         t2 = millis();
         duration = (t2-t1);
         timerReady = true;
-//        Serial.print("     duration: ");
-//        Serial.print(duration);
-//        if(state == Rp || state == S)
-//        {
-//            Serial.print(" ");
-//        }
-//        Serial.print("     next state: ");
-//        Serial.print(int(state));
+//        PrintBody();
     }
     if(timerReady)
     {
         t1 = millis();
         timerReady = false;
     }
-//   Serial.println();
     return;
 }
 
@@ -181,33 +185,27 @@ void Step()
         }
         return;
     }
-
-    
     if(state == Q)
     {
         //Serial.println("Q");
         qC++;
-        if(reading < 140 && reading > 130)
+        if(!triggered && !timerReady && millis() - t1 > 140)
         {
-            UpdateStateVariables(q, qC, timesq);
-            SetState(state+1);
-            return;
+            Pace();
+            triggered = true;
         }
-//        if(!triggered && !timerReady && millis() - t1 > 150)
-//        {
-//            //Pace();
-//            triggered = true;
-//        }
         else if(!triggered && qC > 29)
         {
             Pace();
             triggered = true;
+        }
+        if(triggered || (reading < 140 && reading > 130))
+        {
             UpdateStateVariables(q, qC, timesq);
             SetState(state+1);
         }
         return;
     }
-    
     if(state == R)
     {
         if(triggered)
@@ -224,8 +222,8 @@ void Step()
             if(beat == 12)
             {
                 bpm = int(60 / double((millis() - beatTime) / beat) * 1000);
-                Serial.print("BPM: ");
-                Serial.println(bpm);
+                //Serial.print("BPM: ");
+                //Serial.println(bpm);
                 beat = 0;
                 beatTime = millis();
                 
@@ -287,15 +285,13 @@ void setup()
 }
 
 //*******************************************************
+//******************************************************* 
 //******************************************************* MAIN
-//*******************************************************
 void loop() 
 {
      Poll();
-     //PrintVal();
      Step();
      delay(5);
-     //Serial.println(reading);
 }
 
 
@@ -341,7 +337,6 @@ void Test()
         }
     }
 }
-
 
 
 
