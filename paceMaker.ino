@@ -13,7 +13,7 @@ enum State
     Rp, // peak
     S, //
     T,  //
-    E  // error
+    E,  // error
 };
 
 
@@ -35,6 +35,8 @@ int val = 0;
 enum State state = A;
 
 long duration = 0;
+
+bool paced = false;
 
 bool triggered = false;
 //bool initialized = false;
@@ -67,15 +69,24 @@ int t = 0;
 //******************************************************* PACE
 void Pace()
 {
-    if(millis() - lastPace > 880)
+    paced = true;
+    if(millis() - lastPace > 879)
     {
         digitalWrite(PACE_SIGNAL_PIN, HIGH);
-        //Serial.print("PACED at: ");
-        //Serial.println(reading);
+        errorTime = millis();
         while(reading > 160 || reading < 120)
         {
             Poll();
+            if(millis() - errorTime > 20)
+            {
+                state = E;
+                Serial.print("Setting state: ");
+                Serial.println(int(state));
+                paced = false;
+                break;
+            }
         }
+        Serial.println(millis() - errorTime);
         digitalWrite(PACE_SIGNAL_PIN, LOW);
         lastPace = millis();
     }
@@ -143,14 +154,14 @@ void PrintBody()
 //******************************************************* SetState
 void SetState(int nextState)
 {
-//    PrintHeader();
+    //PrintHeader();
     state = State(nextState);
     if(!timerReady)
     {
         t2 = millis();
         duration = (t2-t1);
         timerReady = true;
-//        PrintBody();
+        //PrintBody();
     }
     if(timerReady)
     {
@@ -166,7 +177,7 @@ void Step()
     
     if(state == A)
     {
-        //Serial.println("A");
+        Serial.println("A");
         if(reading > 150)
         {
             SetState(state+1);
@@ -176,7 +187,7 @@ void Step()
     
     if(state == P)
     {
-        //Serial.println("P");
+        Serial.println("P");
         pC++;
         if(reading > 200 && reading < 225)
         {
@@ -187,14 +198,14 @@ void Step()
     }
     if(state == Q)
     {
-        //Serial.println("Q");
+        Serial.println("Q");
         qC++;
-        if(!triggered && !timerReady && millis() - t1 > 140)
+        if(millis() - t1 > 140 && !triggered)
         {
             Pace();
             triggered = true;
         }
-        else if(!triggered && qC > 29)
+        else if(qC > 29 && !triggered)
         {
             Pace();
             triggered = true;
@@ -202,17 +213,20 @@ void Step()
         if(triggered || (reading < 140 && reading > 130))
         {
             UpdateStateVariables(q, qC, timesq);
-            SetState(state+1);
+            if(paced)
+            {
+                SetState(state+1);
+            }
         }
         return;
     }
     if(state == R)
     {
+        Serial.println("R");
         if(triggered)
         {
             triggered = false;
         }
-        //Serial.println("R");
         rC++;
         if(reading > 550)
         {
@@ -225,8 +239,7 @@ void Step()
                 //Serial.print("BPM: ");
                 //Serial.println(bpm);
                 beat = 0;
-                beatTime = millis();
-                
+                beatTime = millis();      
             }
         }
         return;
@@ -234,7 +247,7 @@ void Step()
 
     if(state == Rp)
     {
-        //Serial.println("Rp");
+        Serial.println("Rp");
         rpC++;
         if(reading < 150)
         {
@@ -246,7 +259,7 @@ void Step()
     
     if(state == S)
     {
-        //Serial.println("S");
+        Serial.println("S");
         sC++;
         if(reading > 195)
         {
@@ -258,7 +271,7 @@ void Step()
     
     if(state == T)
     {
-        //Serial.println("T");
+        Serial.println("T");
         tC++;
         if(reading < 195 && reading > 188)
         {
@@ -267,6 +280,17 @@ void Step()
         }
 
         return;
+    }
+    if(state == E)
+    {
+        Serial.println("ERROR");
+        paced = true;
+        SetState(0);
+    }
+    else
+    {
+        Serial.println("State: ");
+        Serial.println(state);
     }
 }
 
@@ -287,11 +311,14 @@ void setup()
 //*******************************************************
 //******************************************************* 
 //******************************************************* MAIN
+long z1 = micros();
 void loop() 
 {
+     //z1 = micros();
      Poll();
      Step();
      delay(5);
+     //Serial.println(micros() - z1);
 }
 
 
