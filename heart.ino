@@ -4,8 +4,6 @@
 
 #define PACE_SIGNAL_PIN 2
 
-
-
 double ecgVals[] = {.025, .02, .022, .018, .018, .02, .01, .1, .19, .1, -.05, -.07, -.14, .6, 1.2, .6, -.2, -.04, .01, .02, .04, .03, .08, .15, .19, .2, .21, .2, .19, .15, .08, .06, .05, .04, .03, .025};
 const int len = sizeof(ecgVals)/sizeof(double);
 double newEcgVals[len];
@@ -168,7 +166,6 @@ void Test2()
     //Serial.println();
     //SerialUSB.println("waiting");
 }
-
 
 
 
