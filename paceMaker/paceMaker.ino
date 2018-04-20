@@ -80,13 +80,13 @@ void Pace()
             if(millis() - errorTime > 20)
             {
                 state = E;
-                Serial.print("Setting state: ");
-                Serial.println(int(state));
+                //Serial.print("Setting state: ");
+                //Serial.println(int(state));
                 paced = false;
                 break;
             }
         }
-        Serial.println(millis() - errorTime);
+        //Serial.println(millis() - errorTime);
         digitalWrite(PACE_SIGNAL_PIN, LOW);
         lastPace = millis();
     }
@@ -177,7 +177,7 @@ void Step()
     
     if(state == A)
     {
-        Serial.println("A");
+        //Serial.println("A");
         if(reading > 150)
         {
             SetState(state+1);
@@ -187,7 +187,7 @@ void Step()
     
     if(state == P)
     {
-        Serial.println("P");
+        //Serial.println("P");
         pC++;
         if(reading > 200 && reading < 225)
         {
@@ -198,7 +198,7 @@ void Step()
     }
     if(state == Q)
     {
-        Serial.println("Q");
+        //Serial.println("Q");
         qC++;
         if(millis() - t1 > 140 && !triggered)
         {
@@ -222,7 +222,7 @@ void Step()
     }
     if(state == R)
     {
-        Serial.println("R");
+        //Serial.println("R");
         if(triggered)
         {
             triggered = false;
@@ -247,7 +247,7 @@ void Step()
 
     if(state == Rp)
     {
-        Serial.println("Rp");
+       //Serial.println("Rp");
         rpC++;
         if(reading < 150)
         {
@@ -259,7 +259,7 @@ void Step()
     
     if(state == S)
     {
-        Serial.println("S");
+        //Serial.println("S");
         sC++;
         if(reading > 195)
         {
@@ -271,7 +271,7 @@ void Step()
     
     if(state == T)
     {
-        Serial.println("T");
+        //Serial.println("T");
         tC++;
         if(reading < 195 && reading > 188)
         {
