@@ -23,8 +23,13 @@ volatile bool paced = false;
 
 //volatile int k = 0;
 
+int ecgTypeRV = 0;
+int timesRepeatRV = 0;
+
 long t1 = millis();
 
+
+//*********************************************************************** PACE
 void Pace()
 {
     if(j > 11 && j < 17)
@@ -47,6 +52,73 @@ int MapF(double x, double inMin, double inMax, double outMin, double outMax)
 {
     return int((x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin);
 }
+
+//*********************************************************************** MAIN ARHYTHMIA
+void MainArhythmia()
+{
+    ecgTypeRV = random(1000) - 500;
+    timesRepeatRV = random(70) % 7;
+    for(int repeat = 0; repeat < timesRepeatRV; repeat++)
+    {
+        if(ecgTypeRV >= 0)
+        {
+            while(j < len)
+            {
+                analogWrite(DAC1,newEcgVals[j]);
+                j++;
+                delay(26);
+                //SerialUSB.println(newEcgVals[j++]);
+            }
+            j = 0;
+        }
+        else
+        {
+            while(j < len2)
+            {
+                analogWrite(DAC1,newEcgValsSlow[j]);
+                j++;
+                delay(26);
+                //SerialUSB.println(newEcgValsSlow[j++]);
+            }
+            j = 0;          
+        }
+    }
+}
+
+//*********************************************************************** MAIN W BUTTONS
+void MainWithButtons()
+{
+    BTNState = digitalRead(BTN);
+    if(mode != BTNState)
+    {
+        mode = BTNState;
+        SerialUSB.print("mode: ");
+        SerialUSB.println(mode);
+    }
+    if(BTNState == 1)
+    {
+        while(j < len)
+        {
+            analogWrite(DAC1,newEcgVals[j]);
+            j++;
+            delay(26);
+            //SerialUSB.println(newEcgVals[j++]);
+        }
+        j = 0;
+    }
+    else
+    {
+        while(j < len2)
+        {
+            analogWrite(DAC1,newEcgValsSlow[j]);
+            j++;
+            delay(26);
+            //SerialUSB.println(newEcgValsSlow[j++]);
+        }
+        j = 0;
+    }
+}
+
 
 //***********************************************************************
 //*********************************************************************** SETUP
@@ -82,72 +154,9 @@ void setup()
 
 }
 
-void MainWithButtons()
-{
-    BTNState = digitalRead(BTN);
-    if(mode != BTNState)
-    {
-        mode = BTNState;
-        SerialUSB.print("mode: ");
-        SerialUSB.println(mode);
-    }
-    if(BTNState == 1)
-    {
-        while(j < len)
-        {
-            analogWrite(DAC1,newEcgVals[j]);
-            j++;
-            delay(26);
-            //SerialUSB.println(newEcgVals[j++]);
-        }
-        j = 0;
-    }
-    else
-    {
-        while(j < len2)
-        {
-            analogWrite(DAC1,newEcgValsSlow[j]);
-            j++;
-            delay(26);
-            //SerialUSB.println(newEcgValsSlow[j++]);
-        }
-        j = 0;
-    }
-}
-
-int ecgTypeRV = 0;
-int timesRepeatRV = 0;
-
 void loop() 
 {
-
-    ecgTypeRV = random(1000) - 500;
-    timesRepeatRV = random(70) % 7;
-    for(int repeat = 0; repeat < timesRepeatRV; repeat++)
-    {
-        if(ecgTypeRV >= 0)
-        {
-            while(j < len)
-            {
-                analogWrite(DAC1,newEcgVals[j]);
-                j++;
-                delay(26);
-                //SerialUSB.println(newEcgVals[j++]);
-            }
-            j = 0;
-        }
-        else
-        {
-            while(j < len2)
-            {
-                analogWrite(DAC1,newEcgValsSlow[j]);
-                j++;
-                delay(26);
-                //SerialUSB.println(newEcgValsSlow[j++]);
-            }
-            j = 0;          
-        }
-    }
+    MainArhythmia();
 }
 
 
