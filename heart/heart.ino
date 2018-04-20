@@ -84,20 +84,8 @@ void setup()
 
 }
 
-void loop() 
+void MainWithButtons()
 {
-//    if(paced)
-//    {
-//        SerialUSB.print("PACED at: ");
-//        SerialUSB.println(k);
-//        paced = false;
-//    }
-//    if(ignore)
-//    {
-//        SerialUSB.print("IGNORED at: ");
-//        SerialUSB.println(k);
-//        ignore = false;
-//    }
     BTNState = digitalRead(BTN);
     if(mode != BTNState)
     {
@@ -126,6 +114,41 @@ void loop()
             //SerialUSB.println(newEcgValsSlow[j++]);
         }
         j = 0;
+    }
+}
+
+int ecgTypeRV = 0;
+int timesRepeatRV = 0;
+
+void loop() 
+{
+
+    ecgTypeRV = random(1000) - 500;
+    timesRepeatRV = random(70) % 7;
+    for(int repeat = 0; repeat < timesRepeatRV; repeat++)
+    {
+        if(ecgTypeRV >= 0)
+        {
+            while(j < len)
+            {
+                analogWrite(DAC1,newEcgVals[j]);
+                j++;
+                delay(26);
+                //SerialUSB.println(newEcgVals[j++]);
+            }
+            j = 0;
+        }
+        else
+        {
+            while(j < len2)
+            {
+                analogWrite(DAC1,newEcgValsSlow[j]);
+                j++;
+                delay(26);
+                //SerialUSB.println(newEcgValsSlow[j++]);
+            }
+            j = 0;          
+        }
     }
 }
 
