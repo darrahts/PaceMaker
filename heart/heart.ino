@@ -77,10 +77,8 @@ void setup()
     pinMode(DAC1, OUTPUT);
     pinMode(BTN, INPUT_PULLUP);
     analogWrite(DAC1, 0);
-    delay(3000);
-
     attachInterrupt(digitalPinToInterrupt(PACE_SIGNAL_PIN), Pace, RISING);
-    delay(5000);
+    delay(500);
 
 }
 
