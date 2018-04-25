@@ -57,7 +57,7 @@ int MapF(double x, double inMin, double inMax, double outMin, double outMax)
 void MainArhythmia()
 {
     ecgTypeRV = random(1000) - 500;
-    timesRepeatRV = random(70) % 7;
+    timesRepeatRV = (random(70) % 7) + 1; //+1 to remove the zeros
     for(int repeat = 0; repeat < timesRepeatRV; repeat++)
     {
         if(ecgTypeRV >= 0)
