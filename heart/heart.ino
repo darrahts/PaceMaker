@@ -57,31 +57,32 @@ int MapF(double x, double inMin, double inMax, double outMin, double outMax)
 void MainArhythmia()
 {
     ecgTypeRV = random(1000) - 500;
-    timesRepeatRV = (random(70) % 7) + 1; //+1 to remove the zeros
-    for(int repeat = 0; repeat < timesRepeatRV; repeat++)
+    timesRepeatRV = random(70) % 7 + 1;
+    if(ecgTypeRV >= 0)
     {
-        if(ecgTypeRV >= 0)
+        for(int repeat = 0; repeat < timesRepeatRV; repeat++)
         {
             while(j < len)
             {
                 analogWrite(DAC1,newEcgVals[j]);
                 j++;
                 delay(26);
-                //SerialUSB.println(newEcgVals[j++]);
             }
             j = 0;
         }
-        else
+    }
+    else
+    {
+        for(int repeat = 0; repeat < timesRepeatRV; repeat++)
         {
             while(j < len2)
             {
                 analogWrite(DAC1,newEcgValsSlow[j]);
                 j++;
                 delay(26);
-                //SerialUSB.println(newEcgValsSlow[j++]);
             }
-            j = 0;          
-        }
+            j = 0;        
+        }  
     }
 }
 
